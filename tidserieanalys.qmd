@@ -1,0 +1,53 @@
+---
+title: "Marking guide assignment GLM"
+author: "Jacob rak, William Lindquist. Aram Vardanian"
+date: "`r Sys.Date()`"
+output:
+  pdf_document:
+    toc: true
+  html_document:
+    toc: true
+    toc_float: true
+editor_options:
+  markdown:
+    wrap: 72
+---
+
+# Step 1 
+
+Datasetet kommer från
+[https://www.kaggle.com/datasets/vijayvvenkitesh/microsoft-stock-time-series-analysis](#0).
+Datasetet är en tidserieanalys av Microsoft aktiken MSTF som är listad
+på den amerikanska markanden. Uppgifterna hämtades från Google Sheets
+med hjälp av "GOOGLEFINANCE".
+
+```{r}
+dataframe = read.csv("Microsoft_Stock.csv")
+```
+
+## Varibler
+
+Datasetet har över 1511 observationer med 6 olika varibler.
+
+-   Date(från 04/01/2015 till 04/01/2021)
+
+-   Open(Pris vid öppning)
+
+-   high(högst värdet för den dagen)
+
+-   Low(lägsta priset)
+
+-   Close(stängnings priset)
+
+-   Volume(volymen av sålda aktiker)
+
+## Periodictet
+
+Periodiciteten av dataframen är dagligen.
+
+## Val av varibler
+
+För en robust och nyancerad analys kommer det framförallt används av
+Open, high och low som hjälpvariblen och Close som huvudvarible.
+Motiveringen följer, det finns en naturlig koppling mellan dessa för att
+kunna förutspå aktien closing price från ett mänskligt perpektiv.
