@@ -169,7 +169,7 @@ microsoft_ts_trimmed_last_30 <- ts(
 calc_metrics <- function(actual, predicted) {
     rmse <- sqrt(mean((actual - predicted)^2, na.rm = TRUE))
     mad <- mean(abs(actual - predicted), na.rm = TRUE)
-    list(RMSE = rmse, MAD = mad)
+    c(RMSE = rmse, MAD = mad)
 }
 
 
@@ -188,10 +188,86 @@ alpha <- 0.05
 z <- qnorm(1 - alpha / 2)
 
 # plot
-plot(microsoft_ts_trimmed_last_30[, 4], col = "black", lwd = 2, main = "h = 1")
-#lines(forecast, col = "blue", lwd = 2)
-
-plot(microsoft_ts_trimmed_last_30[, 4], col = "black", lwd = 2, main = "h = 1")
+plot(microsoft_ts_trimmed_last_30[, 4], col = "black", lwd = 2, main = "h = 1",
+     ylab = "price")
 lines(forecast, col = "blue", lwd = 2)
+polygon(c(time(forecast), rev(time(forecast))),
+        c(forecast - z * sd(forecast), rev(forecast + z * sd(forecast))),
+        col = rgb(0, 0, 1, 0.2), border = NA)
 
+plot(microsoft_ts_trimmed_last_30[, 4], col = "black", lwd = 2, main = "h = S",
+     ylab = "price")
+lines(forecast_hS, col = "blue", lwd = 2)
+polygon(c(time(forecast_hS), rev(time(forecast_hS))),
+        c(forecast_hS - z * sd(forecast_hS), 
+        rev(forecast_hS + z * sd(forecast_hS))),
+        col = rgb(1, 0, 0, 0.2), border = NA)
+
+
+```
+
+## d) 
+
+```{r}
+set.seed(99)
+N <- length(microsoft_ts_trimmed_last_30[, 4])
+x0 <- microsoft_ts_trimmed_last_30[, 4][1]
+mu <- mean(diff(microsoft_ts_trimmed_last_30[, 4]))
+variance <- var(diff(microsoft_ts_trimmed_last_30[, 4]))
+
+RW <- function(N, x0, mu, variance) {
+  z <- cumsum(rnorm(n = N, mean = 0, sd = sqrt(variance)))
+  t <- 1:N
+  x <- x0 + t * mu + z
+  return(x)
+}
+
+random_walk <- RW(N = N, x0 = x0, mu = mu, variance = variance)
+
+random_walk_ts <- ts(random_walk, start = start(microsoft_ts_trimmed_last_30),
+                     frequency = frequency(microsoft_ts_trimmed_last_30))
+
+plot(random_walk_ts, type = "l", col = "blue", lwd = 2, 
+     main = "Random Walk", 
+     xlab = "Time", 
+     ylab = "Price")
+
+lines(microsoft_ts_trimmed_last_30[, 4], 
+      col = "red", 
+      lwd = 2, 
+      lty = 2)
+
+legend("topright", 
+       legend = c("Random Walk", "Original Data"), 
+       col = c("blue", "red"),
+        lty = c(1, 2), 
+       lwd = c(2, 2))
+
+```
+
+## Lets simulate a few random walks
+
+```{r}
+set.seed(99)
+score <- c(RMSE = 0, MAD = 0)
+best_model = c(RMSE = 0, MAD = 0)
+best_rmse <- Inf
+
+for (i in 1:1000){
+  random_walk <- RW(N = N, x0 = x0, mu = mu, variance = variance)
+
+  random_walk_ts <- ts(random_walk, start = start(microsoft_ts_trimmed_last_30),
+                       frequency = frequency(microsoft_ts_trimmed_last_30))
+  
+  result = calc_metrics(actual = microsoft_ts_trimmed_last_30[,4], 
+                        predicted = random_walk_ts)
+  score = score + result
+  if (result["RMSE"] < best_rmse){
+    best_rmse = result["RMSE"]
+    best_model = result
+  }
+ 
+}
+score/1000
+best_model
 ```
