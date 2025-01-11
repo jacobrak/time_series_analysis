@@ -91,7 +91,7 @@ Exponetial smoothing använder man holtwinters() med $Gamma = False$ och
 $beta = False$ kommer ge en enkel expoential smoothing!
 
 ```{r}
-close_ts <- microsoft_ts[, "Close"]
+close_ts <- microsoft_ts_trimmed[, "Close"]
 
 exp_smoother <- HoltWinters(close_ts,alpha =0.1, beta = FALSE, gamma = FALSE)
 
@@ -101,3 +101,84 @@ legend("topleft", legend = c("Original", "Exponential Values"), col = c("black",
 
 
 ```
+
+## b)
+
+Skapa en funktion som hittar rolling_forecast
+
+```{r}
+rolling_forecast <- function(
+    data,
+    first_pred = time(data)[length(data) - 30],
+    last_pred = time(data)[length(data)],
+    steps_ahead = 1
+) {
+    end <- first_pred - 1/365
+    preds <- list()
+    i <- 1
+  
+    while (end < (last_pred - 0.01)) {
+        train <- window(data, end = end)
+        model <- HoltWinters(train)
+        preds[[i]] <- predict(model, n.ahead = steps_ahead)
+        end <- end + 1/365
+        i <- i + 1
+    }
+  
+    all_preds <- ts(
+        unlist(preds),
+        start = first_pred,
+        frequency = frequency(data)
+    )
+  
+    return(all_preds)
+}
+```
+
+Predict på datan
+
+```{r, message=FALSE, warning=FALSE}
+microsoft_ts_rolling <- microsoft_ts[, 1]
+forecast <- rolling_forecast(
+    data=microsoft_ts_rolling,
+    steps_ahead = 1
+)
+forecast_hS <- rolling_forecast(
+    data = microsoft_ts_rolling,
+    steps_ahead = 4
+)
+```
+
+Plotting forecast
+
+```{r}
+plot(forecast)
+plot(forecast_hS)
+```
+
+Räknar ut båda RMSE och MAD
+
+```{r}
+microsoft_ts_trimmed_last_30 <- ts(
+  microsoft_ts[1482:1511, ],       
+  start = start(microsoft_ts),         
+  frequency = frequency(microsoft_ts)  
+)
+
+
+calc_metrics <- function(actual, predicted) {
+    rmse <- sqrt(mean((actual - predicted)^2, na.rm = TRUE))
+    mad <- mean(abs(actual - predicted), na.rm = TRUE)
+    list(RMSE = rmse, MAD = mad)
+}
+
+
+metrics0 <- calc_metrics(actual = microsoft_ts_trimmed_last_30[,1][1:28], predicted = forecast)
+metrics0
+metrics1 <- calc_metrics(actual = microsoft_ts_trimmed_last_30[,1][1:28], predicted = forecast_hS[1:28])
+metrics1
+```
+
+OBS något gick fel använd 28 istället
+
+## c) 
