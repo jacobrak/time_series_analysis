@@ -85,6 +85,19 @@ plot(microsoft_ts_trimmed[, "Close"],
 
 # Step 2 
 
+## a)
+
+Exponetial smoothing använder man holtwinters() med $Gamma = False$ och
+$beta = False$ kommer ge en enkel expoential smoothing!
+
 ```{r}
+close_ts <- microsoft_ts[, "Close"]
+
+exp_smoother <- HoltWinters(close_ts,alpha =0.1, beta = FALSE, gamma = FALSE)
+
+plot(exp_smoother, main = "Exponential Smoothing - Closing Price", ylab = "Closing Price", xlab = "Date")
+
+legend("topleft", legend = c("Original", "Exponential Values"), col = c("black", "red"), lty = 1)
+
 
 ```
