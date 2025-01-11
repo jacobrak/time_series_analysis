@@ -61,16 +61,30 @@ dataframe <- as.matrix(dataframe[, c("Open", "High", "Low", "Close", "Volume")])
 microsoft_ts <- ts(dataframe, 
                start = c(2015, 4),  
                frequency = 365)
+
+# Subset data
+microsoft_ts_trimmed <- ts(
+  microsoft_ts[1:(1511 - 30), ],       
+  start = start(microsoft_ts),         
+  frequency = frequency(microsoft_ts)  
+)
+
 ```
 
 ```{r}
-plot(microsoft_ts, main="")
+plot(microsoft_ts_trimmed, main="")
 
 ```
 
 ```{r}
-plot(microsoft_ts[, "Close"], 
+plot(microsoft_ts_trimmed[, "Close"], 
      main = "Closing price over time",
      xlab = "date",
      ylab = "Closing price")
+```
+
+# Step 2 
+
+```{r}
+
 ```
