@@ -13,7 +13,7 @@ editor_options:
     wrap: 72
 ---
 
-# Step 1 
+# Step 1
 
 Datasetet kommer från
 [https://www.kaggle.com/datasets/vijayvvenkitesh/microsoft-stock-time-series-analysis](#0).
@@ -52,7 +52,7 @@ Open, high och low som hjälpvariblen och Close som huvudvarible.
 Motiveringen följer, det finns en naturlig koppling mellan dessa för att
 kunna förutspå aktien closing price från ett mänskligt perpektiv.
 
-## Grafer 
+## Grafer
 
 ```{r}
 # Matrix
@@ -83,7 +83,7 @@ plot(microsoft_ts_trimmed[, "Close"],
      ylab = "Closing price")
 ```
 
-# Step 2 
+# Step 2
 
 ## a)
 
@@ -181,7 +181,7 @@ metrics1
 
 OBS något gick fel använd 28 istället
 
-## c) 
+## c)
 
 ```{r}
 alpha <- 0.05
@@ -206,7 +206,7 @@ polygon(c(time(forecast_hS), rev(time(forecast_hS))),
 
 ```
 
-## d) 
+## d)
 
 ```{r}
 set.seed(99)
@@ -270,4 +270,39 @@ for (i in 1:1000){
 }
 score/1000
 best_model
+```
+
+## e) Tolka resultatet!
+
+Efter 1000 random Simuleringar av random walk modellen fick en model
+värden:
+
+```         
+    RMSE      MAD  4.109651 3.642226
+```
+
+Expontiella smoothing fick följande värden med 1 stepahead respktiv 4
+steps ahead:
+
+```         
+    RMSE      MAD  4.040513 3.246373 h1
+    
+    RMSE      MAD  7.935299 5.960994 h4
+```
+
+1 stepahead modellen verkar i detta example vara överlägsen över 4
+stepahead modellen, eftersom data verkar ha hög volatilitet och
+anpassningen av h4 modellen verkar långsammare och mindre anpassad till
+dramtiska förändringar. Detta resultat stämmer överens med aktie data
+som ofta påverkas likt en random model med ar(1).
+
+I snitt när man undersöker random walk modellen tenderar den att vara en
+ganska kraftig del sämre. Detta antyder på att den expoentiala modellen
+är överlag bättre för att analysera de sista 30 observationerna. Dock
+krävs mer forskning om man istället hade ändrat sista tidperioden till
+längre fram eller bak kan resultaten skillnad sig. Utöver det borde man
+kanske testa en randomwalk med drift för ännu bättre resultat.
+
+```         
+    RMSE      MAD  15.25995 13.15743 
 ```
