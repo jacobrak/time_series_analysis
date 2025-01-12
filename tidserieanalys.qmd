@@ -179,8 +179,6 @@ metrics1 <- calc_metrics(actual = microsoft_ts_trimmed_last_30[,4], predicted = 
 metrics1
 ```
 
-OBS något gick fel använd 28 istället
-
 ## c)
 
 ```{r}
@@ -305,4 +303,8 @@ kanske testa en randomwalk med drift för ännu bättre resultat.
 
 ```         
     RMSE      MAD  15.25995 13.15743 
+```
+
+```{r}
+forecast
 ```
