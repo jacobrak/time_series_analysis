@@ -33,21 +33,21 @@ dataframe = read.csv("Microsoft_Stock.csv")
 
 ```
 
-## Varibler
+## Varibler:
 
 Datasetet har över 1511 observationer med 6 olika varibler.
 
--   Date(från 04/01/2015 till 04/01/2021)
+-   Date (från 04/01/2015 till 04/01/2021)
 
--   Open(Pris vid öppning)
+-   Open (Pris vid öppning)
 
--   high(högst värdet för den dagen)
+-   high (högst värdet för den dagen)
 
--   Low(lägsta priset)
+-   Low (lägsta priset)
 
--   Close(stängnings priset)
+-   Close (stängnings priset)
 
--   Volume(volymen av sålda aktiker)
+-   Volume (volymen av sålda aktiker)
 
 ## Periodictet
 
@@ -56,9 +56,9 @@ Periodiciteten av dataframen är dagligen.
 ## Val av varibler
 
 För en robust och nyancerad analys kommer det framförallt används av
-Open, high och low som hjälpvariblen och Close som huvudvarible.
-Motiveringen följer, det finns en naturlig koppling mellan dessa för att
-kunna förutspå aktien closing price från ett mänskligt perpektiv.
+open, high och low som hjälpvariablen och close som huvudvariabel.
+Motiveringen är att det finns en naturlig koppling mellan dessa för att
+kunna förutspå aktiens closing price från ett männskligt perspektiv.
 
 ## Grafer
 
@@ -93,10 +93,11 @@ plot(microsoft_ts_trimmed[, "Close"],
 
 # Step 2
 
-## a) Expontial smoothing
+### a) Expontial smoothing
 
-Exponetial smoothing använder man holtwinters() med $Gamma = False$ och
-$beta = False$ kommer ge en enkel expoential smoothing!
+Exponential smoothing kan vi använda ***holtwinters***() med
+$Gamma = False$ och $beta = False$ vilket kommer ge en enkel expoential
+smoothing.
 
 ```{r}
 close_ts <- microsoft_ts_trimmed[, "Close"]
@@ -110,9 +111,9 @@ legend("topleft", legend = c("Original", "Exponential Values"), col = c("black",
 
 ```
 
-## b) Rolling_forecast
+### b) Rolling_forecast
 
-Skapa en funktion som hittar rolling_forecast
+Skapa en funktion som hittar ***rolling_forecast***
 
 ```{r}
 rolling_forecast <- function(
@@ -187,7 +188,7 @@ metrics1 <- calc_metrics(actual = microsoft_ts_trimmed_last_30[,4], predicted = 
 metrics1
 ```
 
-## c) Plot
+### c) Plot
 
 ```{r}
 alpha <- 0.05
@@ -212,7 +213,7 @@ polygon(c(time(forecast_hS), rev(time(forecast_hS))),
 
 ```
 
-## d) Random walk
+### d) Random walk
 
 ```{r}
 set.seed(99)
@@ -279,7 +280,7 @@ score/1000
 best_model
 ```
 
-## e) Tolka resultatet!
+### e) Tolka resultatet!
 
 Efter 1000 random Simuleringar av random walk modellen fick en model
 värden:
@@ -314,7 +315,12 @@ kanske testa en randomwalk med drift för ännu bättre resultat.
     RMSE      MAD  15.25995 13.15743 
 ```
 
-# Step 3 Stionarity
+# Step 3 Stationary
+
+### a) ADF-Test for stationary check
+
+Vi använder ett adf-test för att undersöka om tidserien är stationary.
+Detta görs med hjälp av funktionen ***adf.test.***
 
 ```{r}
 microsoft_stationarity =microsoft_ts_trimmed
@@ -328,7 +334,10 @@ print(adf_2)
 print(adf_3)
 ```
 
-## b) transform 
+### b) Transformation
+
+Vi transformerar sedan tidserien för att uppnå stationary. Vi gör detta
+på alla våra supportande tidsserier.
 
 ```{r}
 microsoft_stationarity = log(log(microsoft_ts_trimmed))
@@ -343,7 +352,10 @@ print(adf_2)
 print(adf_3)
 ```
 
-## c)
+### c) Plotting the stationary time series
+
+Sist så plottar vi ut våra stationära tidsserier och lägger även till
+korrelogram.
 
 ```{r}
 diff_main <- diff(microsoft_ts[, 4])
@@ -354,11 +366,13 @@ plot(diff_supporting)
 acf(diff_main, main = "ACF - Main Series")
 pacf(diff_main, main = "PACF - Main Series")
 
-acf(diff_supporting)
-pacf(diff_supporting)
+acf(diff_supporting, main = "ACF - Supporting Series")
+pacf(diff_supporting, main = "PACF - Supporting Series")
 ```
 
 # Step 4 ARMA
+
+### a) Fitting ARMA-model
 
 ```{r}
 adf_test <- adf.test(microsoft_ts_trimmed[, 4])
@@ -406,7 +420,7 @@ lines(fitted_values, col = "red", lwd = 1)
 legend("topleft", legend = c("Originaldata", "Fitted Värden"), col = c("blue", "red"), lwd = 2)
 ```
 
-## b) Residuals
+### b) Residuals
 
 ```{r}
 #Kontrollerar residualerna
@@ -426,7 +440,7 @@ blå-streckade gränserna, vilket tyder på att det inte finns någon
 kvarvarande autokorrelation, vilket vårt p-värde även sa. Histogrammet
 verkar tyda på en normalfördelning, vilket är önskvärt.
 
-## c) Rolling_forecast_arma
+### c) Rolling_forecast_arma
 
 ```{r}
 rolling_forecast_arma <- function(data,
@@ -464,7 +478,7 @@ forecast_hS_arma <- rolling_forecast_arma(
     steps_ahead = 4)
 ```
 
-## d) Plot
+### d) Plot
 
 ```{r}
 alpha <- 0.05
@@ -487,7 +501,7 @@ polygon(c(time(forecast_hS_arma), rev(time(forecast_hS_arma))),
         col = rgb(1, 0, 0, 0.2), border = NA)
 ```
 
-## e) RMSE
+### e) RMSE
 
 ```{r}
 metrics2 = calc_metrics(microsoft_ts_trimmed_last_30[, 4], forecast_arma)
@@ -504,9 +518,9 @@ modell i detta fall ser vi tydligt att båda valen av Arma model får
 bättre resultat en den bästa random walk modellen ur 1000 simulationer
 då kan vi säkersälla att ARMA är bättre modelval.
 
-# Step 5 Var
+# Step 5 VAR
 
-a\)
+### a) Fitting VAR-model to data
 
 ```{r}
 VAR_micro <- VAR(microsoft_ts_trimmed[, 1:4])
@@ -522,12 +536,14 @@ Använder normality.test för att testa objektens normalitet. Det hög p
 värdet antyder tydligt att det väldigt signifikanta villket beskriver
 att vår data inte är normalfördelad
 
+### b) Checking for normality
+
 ```{r}
 normality_test <- normality.test(VAR_micro)
 print(normality_test)
 ```
 
-## C) impulse response
+### c) Estimating impulse response
 
 ```{r}
 irf_VAR <- irf(VAR_micro,impulse = "Close", n.ahead = 20)
@@ -535,11 +551,10 @@ irf_VAR <- irf(VAR_micro,impulse = "Close", n.ahead = 20)
 plot(irf_VAR)
 ```
 
-Resultatet påperkar att de första lagen för open, high och low skuter
+Resultatet påperkar att de första lagen för open, high och low skjuter
 upp över den röda 95% CI och sedan till slut jämnar ut sig vid runt 0.25
-ish
 
-## d) rolling forecast var
+### d) Rolling forecast VAR
 
 ```{r}
 rolling_forecast_var <- function(
@@ -572,7 +587,7 @@ rolling_forecast_var <- function(
 }
 ```
 
-```{r, warning=False}
+```{r, warning=FALSE}
 microsoft_ts_rolling <- microsoft_ts[, 1:4]
 forecast_var <- rolling_forecast_var(
     data=microsoft_ts_rolling,
@@ -590,7 +605,7 @@ plot(forecast_var)
 plot(forecast_hS_var)
 ```
 
-## e) Plot
+### e) Plotting predictions
 
 ```{r}
 alpha <- 0.05
@@ -614,7 +629,7 @@ polygon(c(time(forecast_hS_var), rev(time(forecast_hS_var))),
 
 ```
 
-## f) g) Random walk och RMSE
+### f) and g) Random walk och RMSE
 
 ```{r}
 metrics4 = calc_metrics(microsoft_ts_trimmed_last_30[, 4], forecast_var)
@@ -627,11 +642,12 @@ score/1000
 best_model
 ```
 
-Utifrån våra tidigare 1000 simlueringar kan vi kostatera att i
-genomsnitt preseterar en random walk sämre för vårt window i detta fall.
-Det antyder på att VAR modellen är bättre anpassad till vårt dataset
+Utifrån våra tidigare 1000 simlueringar kan vi konstatera att i
+genomsnitt så preseterar en random walk sämre för vårt window i detta
+fall. Det antyder på att VAR modellen är bättre anpassad till vårat
+dataset
 
-## h) Jämföra modeller
+### h) Comparing models
 
 ```{r}
 print("exp")
@@ -646,10 +662,13 @@ metrics5
 ```
 
 När vi jämför tidigare har vi sett att en random walk modell fungerar
-förvänads värt dåligt i jämförlse till de andra modeller. Finaniciell
+förvånads värt dåligt i jämförelse med dem andra modeller. Financiell
 data brukar oftast likna en "random walk" men i vårt fall gäller detta
-påstende inte riktigt men mönstrerna liknar absolut en random walk.
+påstående inte riktigt, trots att mönster och trender liknar en random
+walk.
 
-Alla modeller med step.ahead = 1 presterad alltid bättre det inte
-konstigt då i vår dataset har vi ingen seasonality. VAR var absolut bäst
-med Arma lite bakom och sen expontial smoothing
+Alla modeller med **step.ahead = 1** presterade bättre, vilket inte är
+så konstigt då i vår dataset har vi ingen form seasonality.
+[VAR]{.underline} var utan tvekan det som presterade bäst för våran
+data, följt av [ARMA]{.underline} och sist så har vi [exponential
+smoothing.]{.underline}
