@@ -343,10 +343,19 @@ print(adf_2)
 print(adf_3)
 ```
 
+## c)
+
 ```{r}
-plot(microsoft_stationarity[, 1:4])
-acf(microsoft_stationarity[, 1:4], main = "ACF - Main Series")
-pacf(diff_mainmicrosoft_stationarity[, 1:4], main = "PACF - Main Series")
+diff_main <- diff(microsoft_ts[, 4])
+diff_supporting <- diff(microsoft_ts[, 1:3])
+plot(diff_main)
+plot(diff_supporting)
+
+acf(diff_main, main = "ACF - Main Series")
+pacf(diff_main, main = "PACF - Main Series")
+
+acf(diff_supporting, main = "ACF - Supporting Series")
+pacf(diff_supporting, main = "PACF - Supporting Series")
 ```
 
 # Step 4 ARMA
