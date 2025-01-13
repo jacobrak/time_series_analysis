@@ -354,8 +354,8 @@ plot(diff_supporting)
 acf(diff_main, main = "ACF - Main Series")
 pacf(diff_main, main = "PACF - Main Series")
 
-acf(diff_supporting, main = "ACF - Supporting Series")
-pacf(diff_supporting, main = "PACF - Supporting Series")
+acf(diff_supporting)
+pacf(diff_supporting)
 ```
 
 # Step 4 ARMA
